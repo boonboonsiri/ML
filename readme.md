@@ -1,7 +1,12 @@
 # <b>Documentation</b>
 
 <h3> <b>1. Game Class</b> </h3>
-- Information to store the current game for the current team
+- Information to gather information for current game, and parsing data in regards to current game
+
+
+<h3> <b>1.5 Game ML Class</b> </h3>
+- Information to machine learning (stores previous 10 games)
+
 
 <h3> <b>2. ML Data Collector</b> </h3>
 - Helper class to help collect data for machine learning
@@ -11,7 +16,12 @@
 <h3> <b>3. NHL Team</b> </h3>
 - Each individual team, used for collecting team specific data
 
+<h3> <b>3.5 NHL Teams</b> </h3>
+- Helper class for NHL team. helps gain information about NHL team. Current game data
 
+
+<h3> <b>4. File Reader and Writer</b> </h3>
+- For each team read and write data
 
 <h2><b>To do <br></b> </h2>
 

@@ -13,17 +13,21 @@ class Game:
     #* Goals against
     #* Win percentage (Season culmative)
     #* last 10 win count
+    #* Game in the season (by percentage)
+    #* Current League wide standing
+    #* Shots for? Shots against?
+    #*
+
 
     def __init__(self, formated_game):
         pass 
 
+    def api():
+        pass 
 
     def to_arr(self):
         return []
     def calculate(self):
-        pass
-    def to_str(self):
-
         pass
 
 
@@ -99,9 +103,8 @@ class NHLTeams: # Used to collect information on NHL teams
 
 # http://statsapi.web.nhl.com/api/v1/game/2019020001/boxscore
 
-class MLDataCollector:
 
-
+class FileReaderAndWriter:
     def __init__(self):
         pass 
 
@@ -109,15 +112,31 @@ class MLDataCollector:
     def get_game(season, game, team_id): #* Try to reuse?
         pass 
 
+    def read_game(self):
+        pass 
+
+    def write_game(self):
+        pass 
+
+    def read_ml_game(self):
+        pass 
+    def write_ml_game(self):
+        pass 
+
+class MLDataCollector:
+
+
+    
+    
 
 
     # Seasons
         # Teams
             # Game number
-    def read(filename="default.txt"):
+    def read(filename="defaultin.txt"):
         pass 
 
-    def write(filename = "default.txt"):
+    def write(filename = "defaultout.txt"):
         pass
 
 
