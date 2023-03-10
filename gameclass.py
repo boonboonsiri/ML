@@ -52,8 +52,8 @@ class NHLTeams: # Used to collect information on NHL teams
         pass 
 
     def generate_NHL_teams(self):
-        # 
-        pass  # 
+        return self.team_ids
+
     # 
         # nhl_teams = []
         # for team in self.team_ids:
@@ -259,6 +259,8 @@ class SeasonDataCollector:
         for team in nhl_teams:  
             team_data, failure = self.call_api(year, team)
 
+            print(f'{team}+{year}')
+
             if failure: # If game not found then break
                 break 
 
@@ -272,8 +274,11 @@ class SeasonDataCollector:
 #* Main
 
 def main():
-    datacollector =  MLDataCollector()
-    data = datacollector.readYears()
+    # datacollector =  MLDataCollector()
+    # data = datacollector.readYears()
+
+    season_collector = SeasonDataCollector()
+    season_collector.bulk_api_call()
 
     game = Game(data, 2019, 1)
 
