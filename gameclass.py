@@ -1,33 +1,7 @@
 
 import requests
 import json
-
-class Game:
-
-    #* Top 3 scorers in points last 10. Method one, just find last 10 games, method 2 keep a point tracker class for every players last 10 games
-    #* Save percentage
-    #* Shots for
-    #* Shots against
-    #* Home/Away (1,0)
-    #* Goals for
-    #* Goals against
-    #* Win percentage (Season culmative)
-    #* last 10 win count
-    #* Game in the season (by percentage)
-    #* Current League wide standing
-    #* Shots for? Shots against?
-    #*
-
-    def __init__(self, formated_game):
-        pass 
-
-    def api():
-        pass 
-
-    def to_arr(self):
-        return []
-    def calculate(self):
-        pass
+from mlclass import Game
 
 class PlayerStats:
 
@@ -145,6 +119,7 @@ class MLDataCollector:
             # Game number
 
     game_url = 'http://statsapi.web.nhl.com/api/v1/game/'
+    years = [2019, 2020, 2021, 2022]
 
     def __init__(self):
         self.data = {} # Empty dictionary
@@ -163,11 +138,14 @@ class MLDataCollector:
     def readFile(self):
         return self.read('games.json')
     
-    def readFileYears(self):
-        pass 
+    def readYears(self):
+        data = {}
+        for year in self.years:
+            data[year] = json.loads(self.read(f'games_{year}.json')) #? Why do I need this, I should already be loading it as a json but whatever
+        return data 
     
     def writeYears(self):
-        years = [2019, 2020, 2021, 2022]
+        years = self.years
 
         full_data = self.readFile()
 
@@ -191,7 +169,7 @@ class MLDataCollector:
 
     #* MAKES GAMES REQUEST
     def bulk_api_call(self):
-        seasons = [2019, 2020, 2021, 2022] # Seasons to collect data
+        seasons = self.years # Seasons to collect data
         for season in seasons:
             year_data = self.api_call_year(season)
             self.data[season] = year_data 
@@ -218,11 +196,87 @@ class MLDataCollector:
         return json.loads(resp.content), resp.status_code == 404
 
 
+#* To create database
+class SeasonDataCollector:
+    #? http://statsapi.web.nhl.com/api/v1/game/2019020001/boxscore
+    # Seasons
+        # Teams
+            # Game number
+
+    game_url = 'http://statsapi.web.nhl.com/api/v1/game/'
+    years = [2019, 2020, 2021, 2022]
+
+    def __init__(self):
+        self.data = {} # Empty dictionary
+
+
+    def read(self, filename="default.json"):
+        f = FileReaderAndWriter()
+        data = f.read(filename)
+
+        return data 
+        
+    def write(self, data, filename = "default.json",):
+        f = FileReaderAndWriter()
+        data = f.write(data, filename)
+
+    def readFile(self):
+        return self.read('games.json')
+    
+    def readYears(self):
+        data = {}
+        for year in self.years:
+            data[year] = json.loads(self.read(f'games_{year}.json')) #? Why do I need this, I should already be loading it as a json but whatever
+        return data 
+    
+    def writeYears(self):
+        years = self.years
+
+        full_data = self.readFile()
+
+        for year in years:
+            year_arr = full_data[str(year)]
+            self.write(json.dumps(year_arr), f'games_{year}.json')
+
+
+    #* MAKES GAMES REQUEST
+    def bulk_api_call(self):
+        seasons = self.years # Seasons to collect data
+
+        for season in seasons:
+            year_data = self.api_call_year(season)
+            self.data[season] = year_data 
+
+        self.write(self.data, "games.json")
+
+    def api_call_year(self, year):
+        year_data = []
+
+        self.nhl_teams = nhlteamsclass.generate_NHL_teams()
+
+        for game_number in range(0, int(82*32/2)):  
+            game_data, failure = self.call_api(year, game_number+1)
+            if(game_number % 25 == 1): # Debugging purposes
+                print(f'{year} and {game_number}')
+
+            if failure: # If game not found then break
+                break 
+
+            year_data.append(game_data)
+
+        return year_data
+
+    def call_api(self, year, game_number): # data, failure
+        resp = requests.get(f'http://statsapi.web.nhl.com/api/v1/game/{year}02{str(game_number).zfill(4)}/boxscore')
+        return json.loads(resp.content), resp.status_code == 404
 #* Main
 
 def main():
     datacollector =  MLDataCollector()
-    data = datacollector.writeYears()
+    data = datacollector.readYears()
+
+    game = Game(data, 2019, 1)
+
 
 if __name__ == "__main__":
     main()
