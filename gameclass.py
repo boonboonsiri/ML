@@ -218,7 +218,7 @@ class SeasonDataCollector:
         
     def write(self, data, filename = "default.json",):
         f = FileReaderAndWriter()
-        data = f.write(data, filename)
+        f.write(data, filename)
 
     def readFile(self):
         return self.read('games.json')
@@ -226,7 +226,7 @@ class SeasonDataCollector:
     def readYears(self):
         data = {}
         for year in self.years:
-            data[year] = json.loads(self.read(f'games_{year}.json')) #? Why do I need this, I should already be loading it as a json but whatever
+            data[year] = json.loads(self.read(f'season_{year}.json')) #? Why do I need this, I should already be loading it as a json but whatever, probably cause array now that i think of it
         return data 
     
     def writeYears(self):
@@ -236,7 +236,7 @@ class SeasonDataCollector:
 
         for year in years:
             year_arr = full_data[str(year)]
-            self.write(json.dumps(year_arr), f'games_{year}.json')
+            self.write(json.dumps(year_arr), f'season_{year}.json')
 
 
     #* MAKES GAMES REQUEST
@@ -247,27 +247,27 @@ class SeasonDataCollector:
             year_data = self.api_call_year(season)
             self.data[season] = year_data 
 
-        self.write(self.data, "games.json")
+        self.writeYears();
+
 
     def api_call_year(self, year):
-        year_data = []
+        year_data = {}
 
-        self.nhl_teams = nhlteamsclass.generate_NHL_teams()
+        nhlteamsclass = NHLTeams() 
+        nhl_teams = nhlteamsclass.generate_NHL_teams()
 
-        for game_number in range(0, int(82*32/2)):  
-            game_data, failure = self.call_api(year, game_number+1)
-            if(game_number % 25 == 1): # Debugging purposes
-                print(f'{year} and {game_number}')
+        for team in nhl_teams:  
+            team_data, failure = self.call_api(year, team)
 
             if failure: # If game not found then break
                 break 
 
-            year_data.append(game_data)
+            year_data[team] = team_data
 
         return year_data
 
-    def call_api(self, year, game_number): # data, failure
-        resp = requests.get(f'http://statsapi.web.nhl.com/api/v1/game/{year}02{str(game_number).zfill(4)}/boxscore')
+    def call_api(self, year, team): # data, failure
+        resp = requests.get(f'https://statsapi.web.nhl.com/api/v1/schedule?expand=schedule.linescore&teamId={team}&season={year}{year+1}&gameType=R')
         return json.loads(resp.content), resp.status_code == 404
 #* Main
 
