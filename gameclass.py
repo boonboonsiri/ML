@@ -160,6 +160,22 @@ class MLDataCollector:
         f = FileReaderAndWriter()
         data = f.write(data, filename)
 
+    def readFile(self):
+        return self.read('games.json')
+    
+    def readFileYears(self):
+        pass 
+    
+    def writeYears(self):
+        years = [2019, 2020, 2021, 2022]
+
+        full_data = self.readFile()
+
+        for year in years:
+            year_arr = full_data[str(year)]
+            self.write(json.dumps(year_arr), f'games_{year}.json')
+
+        
     #* Collects user data
     def collect_data(self):
         #* Collects data
@@ -202,15 +218,11 @@ class MLDataCollector:
         return json.loads(resp.content), resp.status_code == 404
 
 
-
 #* Main
 
 def main():
     datacollector =  MLDataCollector()
-    datacollector.bulk_api_call()
-
-
-    
+    data = datacollector.writeYears()
 
 if __name__ == "__main__":
     main()
