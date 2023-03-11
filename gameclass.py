@@ -2,7 +2,7 @@
 import requests
 import json
 from mlclass import Game
-
+from pdb import set_trace
 class PlayerStats:
 
     def __init__(self):
@@ -150,7 +150,7 @@ class MLDataCollector:
         full_data = self.readFile()
 
         for year in years:
-            year_arr = full_data[str(year)]
+            year_arr = full_data[year]
             self.write(json.dumps(year_arr), f'games_{year}.json')
 
         
@@ -198,12 +198,10 @@ class MLDataCollector:
 
 #* To create database
 class SeasonDataCollector:
-    #? http://statsapi.web.nhl.com/api/v1/game/2019020001/boxscore
     # Seasons
         # Teams
             # Game number
 
-    game_url = 'http://statsapi.web.nhl.com/api/v1/game/'
     years = [2019, 2020, 2021, 2022]
 
     def __init__(self):
@@ -232,10 +230,12 @@ class SeasonDataCollector:
     def writeYears(self):
         years = self.years
 
-        full_data = self.readFile()
+
+        # full_data = self.readFile()
+        full_data = self.data
 
         for year in years:
-            year_arr = full_data[str(year)]
+            year_arr = full_data[year]
             self.write(json.dumps(year_arr), f'season_{year}.json')
 
 
@@ -275,19 +275,19 @@ class SeasonDataCollector:
 
 def main():
     # datacollector =  MLDataCollector()
-    # data = datacollector.readYears()
+    # game_data = datacollector.readYears()
 
     season_collector = SeasonDataCollector()
     season_collector.bulk_api_call()
 
-    game = Game(data, 2019, 1)
+    # season_data = season_collector.readYears()
+
+    set_trace()
+    game = Game(game_data, season_data, 2019, 1)
 
 
 if __name__ == "__main__":
     main()
-
-
-
 
 # #* TESTING
 # params = {
