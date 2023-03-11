@@ -2,11 +2,11 @@ from pdb import set_trace
 
 def league_percentage_calculator(cur_game, year):
     if(year == 2022 or year == 2021):
-        return cur_game / 82
+        return cur_game / (82*32)
     elif year == 2020:
-        return cur_game / 56 
+        return cur_game / (56 *32)
     else:
-       return cur_game / 70
+       return cur_game / (70*32)
 class Game:
     
     #* Top 3 scorers in points last 10. Method one, just find last 10 games, method 2 keep a point tracker class for every players last 10 games
@@ -66,37 +66,27 @@ class Game:
         team_data['game_in_season'] = league_percentage_calculator(self.game_number, self.year)
         team_data['league_standing'] = 0
 
-        last_10, team_schedule_index = self.last(10, team_id)
+        team_schedule_index, last_10 = self.last_ten(team_id)
 
         for game in last_10:
             actual_game = game.get('games')[0]
-            team_data['shots_for'] += actual_game['line_score']['teams'][status]['shotsOnGoal']
-            team_data['against'] += actual_game['line_score']['teams'][not_status]['shotsOnGoal']
+            team_data['shots_for'] += actual_game['linescore']['teams'][status]['shotsOnGoal']
+            team_data['shots_against'] += actual_game['linescore']['teams'][not_status]['shotsOnGoal']
 
-            team_data['goals_for'] += actual_game['line_score']['teams'][status]['goals']
-            team_data['goals_against'] += actual_game['line_score']['teams'][not_status]['goals']
+            team_data['goals_for'] += actual_game['linescore']['teams'][status]['goals']
+            team_data['goals_against'] += actual_game['linescore']['teams'][not_status]['goals']
             
-
-
-
-
-
+        set_trace()
         #* Game in the season (by percentage)
-
-
 
         return team_data
 
     def last_ten(self, team_id): #* Returns last 10 games
-        team_schedule = self.season_data[self.year][team_id]
-        team_schedule_index = team_schedule['dates'].find(lambda date: date.get('games')[0]['gamePk'] == self.gamePk)
-
+        team_schedule = self.season_data[self.year][str(team_id)]
+        # team_schedule_index = team_schedule['dates'].index(lambda date: date.get('games')[0]['gamePk'] == self.gamePk)
+        generator = (i for i,v in enumerate(team_schedule['dates']) if int(v.get('games')[0]['gamePk']) == self.gamePk+1)
+        team_schedule_index = next(generator)
         return team_schedule_index, team_schedule.get('dates')[max(team_schedule_index-10, 0):team_schedule_index]
-
-
-        
-
-        set_trace()
 
     def calculate_past_game(self, team):
         pass

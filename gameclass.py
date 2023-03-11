@@ -274,21 +274,20 @@ class SeasonDataCollector:
 #* Main
 
 def main():
-    # datacollector =  MLDataCollector()
-    # game_data = datacollector.readYears()
+    datacollector =  MLDataCollector()
+    game_data = datacollector.readYears()
 
     season_collector = SeasonDataCollector()
-    season_collector.bulk_api_call()
+    season_data = season_collector.readYears()
 
-    # season_data = season_collector.readYears()
-
-    set_trace()
-    game = Game(game_data, season_data, 2019, 1)
+    game = Game(game_data, season_data, 2019, 200) #? BE VERY CAREFUL WITH THIS PLUS 1
 
 
 if __name__ == "__main__":
     main()
 
+
+#! Important, I accidentally saved all game indexes minus 1
 # #* TESTING
 # params = {
 #         "teamId":30, 
