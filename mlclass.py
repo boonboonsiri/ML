@@ -7,6 +7,8 @@ def league_percentage_calculator(cur_game, year):
         return cur_game / (56 *32)
     else:
        return cur_game / (70*32)
+    
+#* Old game data, 
 class Game:
     
     #* Top 3 scorers in points last 10. Method one, just find last 10 games, method 2 keep a point tracker class for every players last 10 games
@@ -99,3 +101,15 @@ class Game:
         return []
     def calculate(self):
         pass
+
+
+class TeamGame():
+    # Calculate team game per season
+    def __init__(self):
+        pass 
+
+class TrainingGame: # Game information from both teams for the last 10 games, and result, used 
+    def __init__(self):
+        pass 
+
+

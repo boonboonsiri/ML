@@ -3,56 +3,58 @@ import requests
 import json
 from mlclass import Game
 from pdb import set_trace
-class PlayerStats:
 
-    def __init__(self):
-        pass 
+# Deprecated
+# class PlayerStats:
 
-    def query(self, playerId, season, gameNumber): #* return player stat for game of season
-        pass 
+#     def __init__(self):
+#         pass 
+
+#     def query(self, playerId, season, gameNumber): #* return player stat for game of season
+#         pass 
         
-class LeagueStats:
-    def __init__(self):
-        pass
+# class LeagueStats:
+#     def __init__(self):
+#         pass
 
-class NHLTeam: # Class to obtain team schedule
+# class NHLTeam: # Class to obtain team schedule
 
-# ?startDate=2018-01-09 Start date for the search
-# ?endDate=2018-01-12 End date for the search
-# ?season=20172018 Returns all games from specified season
-# ?gameType=R Restricts results to only regular season games. Can be set to any value from Game Types endpoint
-# GET https://statsapi.web.nhl.com/api/v1/schedule?teamId=30 Returns Minnesota Wild games for the current day
-    def __init__(self, id):
-        self.id = id
+# # ?startDate=2018-01-09 Start date for the search
+# # ?endDate=2018-01-12 End date for the search
+# # ?season=20172018 Returns all games from specified season
+# # ?gameType=R Restricts results to only regular season games. Can be set to any value from Game Types endpoint
+# # GET https://statsapi.web.nhl.com/api/v1/schedule?teamId=30 Returns Minnesota Wild games for the current day
+#     def __init__(self, id):
+#         self.id = id
 
-        self.team_list = []
+#         self.team_list = []
 
-    def obtain_game(self, year:int , game_number:int): # Call NHL api and return game information for this year
-        pass 
+#     def obtain_game(self, year:int , game_number:int): # Call NHL api and return game information for this year
+#         pass 
 
-    def format_game(self, gameData):
-        pass 
+#     def format_game(self, gameData):
+#         pass 
 
-    def calculate_season(self, season:int):
+#     def calculate_season(self, season:int):
         
-        #https://statsapi.web.nhl.com/api/v1/schedule?teamId=30
+#         #https://statsapi.web.nhl.com/api/v1/schedule?teamId=30
 
-        for gameNumber in range(82):
-            #* Game ingestion pipeline
-            game_data = self.obtain_game(season, gameNumber)
-            formated_data = self.format_game(game_data)
-            game = Game(formated_data)
+#         for gameNumber in range(82):
+#             #* Game ingestion pipeline
+#             game_data = self.obtain_game(season, gameNumber)
+#             formated_data = self.format_game(game_data)
+#             game = Game(formated_data)
 
-            pass 
-class NHLTeams: # Used to collect information on NHL teams
+#             pass 
+# class NHLTeams: # Used to collect information on NHL teams
 
     
-    def __init__(self):
-        self.team_ids = [1,5, 6, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
-        pass 
+    # def __init__(self):
+    #     self.team_ids = [1,5, 6, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+    #     pass 
 
-    def generate_NHL_teams(self):
-        return self.team_ids
+    # def generate_NHL_teams(self):
+    #     return self.team_ids
 
     # 
         # nhl_teams = []
@@ -112,6 +114,7 @@ class MLGuesser:
 
 
 #* To create database
+#* Data per game I think from NHLAPI
 class MLDataCollector:
     #? http://statsapi.web.nhl.com/api/v1/game/2019020001/boxscore
     # Seasons
@@ -197,6 +200,7 @@ class MLDataCollector:
 
 
 #* To create database
+#* Data per season I think from NHLAPI, I believe this is just used for a teams last 10 games
 class SeasonDataCollector:
     # Seasons
         # Teams
