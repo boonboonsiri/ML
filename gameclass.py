@@ -157,18 +157,18 @@ class MLDataCollector:
             self.write(json.dumps(year_arr), f'games_{year}.json')
 
         
-    #* Collects user data
-    def collect_data(self):
-        #* Collects data
-        seasons = [2019, 2020, 2021] # Seasons to collect data
+    # #! Deprecated Collects user data
+    # def collect_data(self):
+    #     #* Collects data
+    #     seasons = [2019, 2020, 2021] # Seasons to collect data
 
-        nhlteamsclass = NHLTeams() 
-        self.nhl_teams = nhlteamsclass.generate_NHL_teams()
+    #     nhlteamsclass = NHLTeams() 
+    #     self.nhl_teams = nhlteamsclass.generate_NHL_teams()
 
-        for season in seasons:
+    #     for season in seasons:
 
-            for team in self.nhl_teams:
-                team.calculate_season(season)
+    #         for team in self.nhl_teams:
+    #             team.calculate_season(season)
 
     #* MAKES GAMES REQUEST
     def bulk_api_call(self):

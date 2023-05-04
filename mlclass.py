@@ -9,6 +9,9 @@ def league_percentage_calculator(cur_game, year):
        return cur_game / (70*32)
     
 #* Old game data, 
+#! Deprecated to instead use TeamGame (for individual team game)
+#! And TrainingGame used for training based on the previous 10 games, plus maybe rest of the season lol
+#! However, many useful helpers in this class
 class Game:
     
     #* Top 3 scorers in points last 10. Method one, just find last 10 games, method 2 keep a point tracker class for every players last 10 games
@@ -28,7 +31,6 @@ class Game:
 
 
     data = {}
-
 
     def __init__(self, game_data, season_data, year, game_number):
         self.game_data = game_data
@@ -103,13 +105,119 @@ class Game:
         pass
 
 
-class TeamGame():
-    # Calculate team game per season
-    def __init__(self):
-        pass 
+
+#* Individual game based on team, 
+#* Should only store data based on the current team and current game hopefully?
+class TeamGame:
+    
+    #* Top 5 scorers in points last 10. Method one, just find last 10 games, method 2 keep a point tracker class for every players last 10 games
+    #* Save percentage
+    #* Shots for
+    #* Shots against
+    #* Home/Away (1,0)
+    #* Goals for
+    #* Goals against
+    #* last 10 win count
+    #* last 10 tie count
+    #* Game in the season (by percentage)
+    #*
+    #? Need to do seperately
+    #* Win percentage (Season culmative) -> maybe just do this one
+
+    #! Todo but probably a lot harder to do
+    #* Current League wide standing
+    #* Current goalie starting
+
+    data = {}
+
+    def __init__(self, game_data, season_data, year, game_number, team):
+        self.game_data = game_data
+        self.season_data = season_data
+        self.game = game_data[year][game_number]
+        self.year = year
+        self.game_number = game_number
+        self.team = team
+        self.gamePk = int(f'{year}02{str(game_number).zfill(4)}')
+
+        self.calculate_game()
+
+    def calculate_game(self):
+        self.home = self.calculate_team(self.game['teams']['home'], 'home')
+        self.away = self.calculate_team(self.game['teams']['away'], 'away')
+
+        self.winner = self.game['teams']['home']['teamStats']['teamSkaterStats']['goals'] >= self.game['teams']['away']['teamStats']['teamSkaterStats']['goals']
+        
+
+    def calculate_team(self, team, status):
+        team_data = {}
+        team_id = team.get('team').get('id')
+
+        skaters = team.get('skaters')
+        goalies = team.get('goalies')
+
+        team_data['is_home'] = status == 'home'
+        team_data['id'] = team_id;
+        team_data['shots_for'] = 0
+        team_data['shots_against'] = 0
+        team_data['goals_for'] = 0 
+        team_data['goals_against'] = 0
+        team_data['last_10_win'] = 0
+        team_data['last_10_tie'] = 0
+        team_data['game_in_season'] = league_percentage_calculator(self.game_number, self.year)
+        team_data['league_standing'] = 0
+            
+        #* Game in the season (by percentage)
+
+        return team_data
 
 class TrainingGame: # Game information from both teams for the last 10 games, and result, used 
+    #* Top 3 scorers in points last 10. Method one, just find last 10 games, method 2 keep a point tracker class for every players last 10 games
+    #* Save percentage
+    #* Shots for
+    #* Shots against
+    #* Home/Away (1,0)
+    #* Goals for
+    #* Goals against
+    #* last 10 win count
+    #* last 10 tie count
+    #* Game in the season (by percentage)
+    #*
+    #? Need to do seperately
+    #* Win percentage (Season culmative) -> maybe just do this one
+
+    #! Todo but probably a lot harder to do
+    #* Current League wide standing
+    #* Current goalie starting
+
     def __init__(self):
         pass 
+    
+    def flatten(): #* To actually flatten
+        pass
 
+
+#* probably move this to game class tbh
+class TrainingGameStorage:
+    def __init__(self):
+        pass
+        self.seasons = {}
+    
+    def flatten_season(self):
+        pass
+
+    def readSeason(self):
+        pass 
+
+    def writeSeason(self):
+        pass 
+
+    def writeFile(self):
+        pass
+    def readFile(self):
+        pass
+
+    def read(self):
+        pass 
+    def write(self):
+        pass
 
