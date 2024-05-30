@@ -5,7 +5,7 @@ import json
 from pprint import pprint
 from tqdm import tqdm
 import multiprocessing
-
+from datetime import datetime, timedelta
 
 
 
@@ -75,39 +75,36 @@ class APIMachine:
         url = f'https://api-web.nhle.com/v1/gamecenter/{year}02{str(game_number+1).zfill(4)}/boxscore'
         resp = requests.get(url)
         data = None
-        f = FileManager()
         if resp.status_code == 200:
             data = resp.json()
-            f.write(data, 'samples/game.json')
-            game_date = data['gameDate']
+            game_date = data['gameDate'] # subtract 1 day to not include the game (for training future games). THIS FOR A FACT MEANS YOU CAN"T TRAIN GAME 0
+            date_obj = datetime.strptime(game_date, '%Y-%m-%d'); new_date = date_obj - timedelta(days=1)
+            game_date = new_date.strftime('%Y-%m-%d')
+
             url = f"https://api-web.nhle.com/v1/standings/{game_date}"
             resp = requests.get(url)
 
             if resp.status_code == 200:
                 standing_data = resp.json()
-                f.write(standing_data, 'samples/standing.json')
-
                 data['standings'] = standing_data
-                f.write(data, 'samples/new_game.json')
 
 
 
         return data, resp.status_code == 404
 
-    def verify_game_api(self):
-        data, _ = self.call_game_api(2020, 400)
+    def verify_game_api(self, year=2020, game=400):
+        data, _ = self.call_game_api(year, game)
         pprint(data)
 
 
 def testing():
     # f = FileManager(); f.verify()
-    a = APIMachine(); a.verify_game_api()
+    a = APIMachine(); a.verify_game_api(2020, 10)
 
 
 def main():
     testing()
-    # a = APIMachine()
-    # a.api_download_all()
+    #a = APIMachine(); a.api_download_all() # download
 
 if __name__ == "__main__":
     main()

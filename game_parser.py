@@ -145,10 +145,31 @@ class Parser:
         game.game_in_season_percentage = league_percentage_calculator(game_number, year)
 
         self.parse_standings(game, game_data)
+        self.parse_last_10(game, game_data, game)
 
         return game
 
-    def parse_standings(self, game, game_data):
+    def parse_last_10(self, game: Game, game_data: dict):
+        home_last_10 = self.get_last_10(game, game.home, game.home_games_played)
+        pprint(home_last_10[0:20])
+        print(game.home)
+        pass
+    def get_last_10(self, game: Game, team: str, gamesPlayed: int):
+        last_10 = []
+        if team in self.last_10: # filter the teams games only once
+            last_10 = self.last_10[team]
+        else:
+            last_10 = [game for game in self.data['games'] if ('homeTeam' in game and 'abbrev' in game['homeTeam'] and game['homeTeam']['abbrev'] == team) or ('awayTeam' in game and 'abbrev' in game['awayTeam'] and game['awayTeam']['abbrev'] == team)]
+            self.last_10[team] = last_10
+
+
+
+
+        return filtered_games
+
+
+    # WILL BREAK IF TEAM HAS YET TO PLAY A GAME
+    def parse_standings(self, game: Game, game_data: dict):
         standings = game_data['standings']['standings']
         home = game.home
         away = game.away
