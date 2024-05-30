@@ -75,22 +75,27 @@ class APIMachine:
         url = f'https://api-web.nhle.com/v1/gamecenter/{year}02{str(game_number+1).zfill(4)}/boxscore'
         resp = requests.get(url)
         data = None
+        f = FileManager()
         if resp.status_code == 200:
             data = resp.json()
+            f.write(data, 'samples/game.json')
             game_date = data['gameDate']
             url = f"https://api-web.nhle.com/v1/standings/{game_date}"
             resp = requests.get(url)
 
             if resp.status_code == 200:
                 standing_data = resp.json()
+                f.write(standing_data, 'samples/standing.json')
 
                 data['standings'] = standing_data
+                f.write(data, 'samples/new_game.json')
+
 
 
         return data, resp.status_code == 404
 
     def verify_game_api(self):
-        data, _ = self.call_game_api(2020, 1)
+        data, _ = self.call_game_api(2020, 400)
         pprint(data)
 
 
@@ -100,8 +105,8 @@ def testing():
 
 
 def main():
-    # testing()
-    a = APIMachine()
+    testing()
+    # a = APIMachine()
     # a.api_download_all()
 
 if __name__ == "__main__":
