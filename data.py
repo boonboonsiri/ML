@@ -99,8 +99,8 @@ class APIMachine:
 
 def testing():
     # f = FileManager(); f.verify()
-    a = APIMachine(); a.verify_game_api(2020, 10)
-
+    #a = APIMachine(); a.verify_game_api(2020, 10)
+    #f = FileManager(); a = f.read('test.json')
 
 def main():
     testing()

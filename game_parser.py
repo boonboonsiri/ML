@@ -51,14 +51,15 @@ class Game:
         self.home_goals_against_l10 = None
         self.home_wins_l10 = None
         self.home_ties_l10 = None
-        self.home_loses_l10 = None # can be accessed in standings
-        self.home_points_l10 = None
+        self.home_loses_l10 = None
+        self.home_points_l10 = None # can be accessed in standings
         self.home_save_percentage_l10 = None
         self.home_shots_for_l10 = None
         self.home_shots_against_l10 = None
-        self.home_power_play_percentage_l_10 = None
-        self.home_penalty_kill_percentage_l_10 = None
-        self.home_powerplay_goals_l_10 = None
+        self.home_power_play_goals_l10 = None
+        self.home_power_plays_l10 = None
+        self.home_penalty_kill_goals_against_l10 = None
+        self.home_penalty_kills_l10 = None
         self.home_p1 = None
         self.home_p2 = None
         self.home_p3 = None
@@ -86,14 +87,15 @@ class Game:
         self.away_goals_against_l10 = None
         self.away_wins_l10 = None
         self.away_ties_l10 = None
-        self.away_loses_l10 = None # can be accessed in standings
-        self.away_points_l10 = None
+        self.away_loses_l10 = None
+        self.away_points_l10 = None # can be accessed in standings
         self.away_save_percentage_l10 = None
         self.away_shots_for_l10 = None
         self.away_shots_against_l10 = None
-        self.away_power_play_percentage_l_10 = None
-        self.away_penalty_kill_percentage_l_10 = None
-        self.away_powerplay_goals_l_10 = None
+        self.away_power_play_goals_l10 = None
+        self.away_power_plays_l10 = None
+        self.away_penalty_kill_goals_against_l10 = None
+        self.away_penalty_kills_l10 = None
         self.away_p1 = None
         self.away_p2 = None
         self.away_p3 = None
@@ -144,28 +146,85 @@ class Parser:
         game.date = game_data['gameDate']
         game.game_in_season_percentage = league_percentage_calculator(game_number, year)
 
-        self.parse_standings(game, game_data)
-        self.parse_last_10(game, game_data, game)
+        try: # Check if valid parsing
+            self.parse_standings(game, game_data)
+        except Exception as e:
+            print("Parse Game Exception", e, year, game_number)
+            return None
+
+        self.parse_last_10(game, game_data)
 
         return game
 
     def parse_last_10(self, game: Game, game_data: dict):
         home_last_10 = self.get_last_10(game, game.home, game.home_games_played)
-        pprint(home_last_10[0:20])
-        print(game.home)
-        pass
+        away_last_10 = self.get_last_10(game, game.away, game.away_games_played)
+        self.parse_last_10_individually(game, game_data, home_last_10, game.home, away_last_10, game.away)
+
+    def parse_last_10_individually(self, game: Game, game_data: dict, home_last_10: list, home_team: str, away_last_10: list, away_team: str):
+        def isHome(g, team): # if the team we're analysing is the home team for that game
+            return g['homeTeam']['abbrev'] == team
+        # note sog 0, powerPlay 2
+        def accumulateValue(g: dict, value: int, team: str, useTeamForStats: bool):
+            if useTeamForStats: # ie shots for
+                return g['summary']['teamGameStats'][value]['homeValue'] if isHome(g, team) else g['summary']['teamGameStats'][value]['awayValue']
+            else: # ie shots against
+                return g['summary']['teamGameStats'][value]['awayValue'] if isHome(g, team) else g['summary']['teamGameStats'][value]['homeValue']
+
+        game.home_shots_for_l10 = sum([accumulateValue(g, 0, home_team, True) for g in home_last_10])
+        game.home_shots_against_l10 = sum([accumulateValue(g, 0, home_team, False) for g in home_last_10])
+        game.home_power_play_goals_l10 = sum([int(accumulateValue(g, 2, home_team, True).split('/')[0]) for g in home_last_10])
+        game.home_power_plays_l10 = sum([int(accumulateValue(g, 2, home_team, True).split('/')[1]) for g in home_last_10])
+        game.home_penalty_kill_goals_against_l10 = sum([int(accumulateValue(g, 2, home_team, False).split('/')[0]) for g in home_last_10])
+        game.home_penalty_kills_l10 = sum([int(accumulateValue(g, 2, home_team, False).split('/')[1]) for g in home_last_10])
+
+        game.away_shots_for_l10 = sum([accumulateValue(g, 0, away_team, True) for g in away_last_10])
+        game.away_shots_against_l10 = sum([accumulateValue(g, 0, away_team, False) for g in away_last_10])
+        game.away_power_play_goals_l10 = sum([int(accumulateValue(g, 2, away_team, True).split('/')[0]) for g in away_last_10])
+        game.away_power_plays_l10 = sum([int(accumulateValue(g, 2, away_team, True).split('/')[1]) for g in away_last_10])
+        game.away_penalty_kill_goals_against_l10 = sum([int(accumulateValue(g, 2, away_team, False).split('/')[0]) for g in away_last_10])
+        game.away_penalty_kills_l10 = sum([int(accumulateValue(g, 2, away_team, False).split('/')[1]) for g in away_last_10])
+
+        def parse_players( team: str, teams_last_10):
+            players_stats = {}
+            for g in teams_last_10:
+                players = g['playerByGameStats']['homeTeam'] if isHome(g, team) else g['playerByGameStats']['awayTeam']
+                goalies = players['goalies']
+                players = players['forwards'] + players['defense']
+
+                for player in players:
+                    player_id = player['playerId']
+                    points = player['points']
+
+                    if player_id in players_stats:
+                        players_stats[player_id] += points
+                    else:
+                        players_stats[player_id] = points
+
+
+
+
+        game.home_save_percentage_l10 = None
+        game.home_p1 = None
+        game.home_p2 = None
+        game.home_p3 = None
+        game.home_p4 = None
+        game.home_p5 = None
+
+
+
+
     def get_last_10(self, game: Game, team: str, gamesPlayed: int):
         last_10 = []
         if team in self.last_10: # filter the teams games only once
             last_10 = self.last_10[team]
         else:
             last_10 = [game for game in self.data['games'] if ('homeTeam' in game and 'abbrev' in game['homeTeam'] and game['homeTeam']['abbrev'] == team) or ('awayTeam' in game and 'abbrev' in game['awayTeam'] and game['awayTeam']['abbrev'] == team)]
+            if len(last_10) == 56: # 2020 season, games out of order because rescheduling covid games
+                last_10.sort(key= lambda x: x['gameDate'])
             self.last_10[team] = last_10
 
-
-
-
-        return filtered_games
+        return last_10[gamesPlayed-10:gamesPlayed]
 
 
     # WILL BREAK IF TEAM HAS YET TO PLAY A GAME
@@ -229,11 +288,6 @@ class Parser:
         game.away_ties_l10 = away_standings['l10OtLosses']
         game.away_loses_l10 = away_standings['l10Losses']
         game.away_points_l10 = away_standings['l10Points']
-
-
-    def get_teams_last_10(self):
-
-        pass
 
 
     def verify_load_data(self):
