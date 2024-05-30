@@ -148,11 +148,12 @@ class Parser:
 
         try: # Check if valid parsing
             self.parse_standings(game, game_data)
+            self.parse_last_10(game, game_data)
         except Exception as e:
             print("Parse Game Exception", e, year, game_number)
             return None
 
-        self.parse_last_10(game, game_data)
+
 
         return game
 
@@ -187,6 +188,8 @@ class Parser:
 
         def parse_players( team: str, teams_last_10):
             players_stats = {}
+            shots_against = 0
+            goalies_goals_against = 0
             for g in teams_last_10:
                 players = g['playerByGameStats']['homeTeam'] if isHome(g, team) else g['playerByGameStats']['awayTeam']
                 goalies = players['goalies']
@@ -201,17 +204,17 @@ class Parser:
                     else:
                         players_stats[player_id] = points
 
+                for goalie in goalies:
+                    shots_against += int(goalie['saveShotsAgainst'].split('/')[1])
+                    goalies_goals_against += int(goalie['saveShotsAgainst'].split('/')[0])
 
+            largest_items = sorted(players_stats.values(), reverse=True)[0:5]
+            largest_items.append(goalies_goals_against/shots_against)
+            return largest_items
 
+        game.home_p1, game.home_p2, game.home_p3, game.home_p4, game.home_p5, game.home_save_percentage_l10 = parse_players(home_team, home_last_10)
 
-        game.home_save_percentage_l10 = None
-        game.home_p1 = None
-        game.home_p2 = None
-        game.home_p3 = None
-        game.home_p4 = None
-        game.home_p5 = None
-
-
+        game.away_p1, game.away_p2, game.away_p3, game.away_p4, game.away_p5, game.away_save_percentage_l10 = parse_players(away_team, away_last_10)
 
 
     def get_last_10(self, game: Game, team: str, gamesPlayed: int):
@@ -297,10 +300,6 @@ class Parser:
     def verify_parse_game(self, year=2020, game_number=400):
         game = self.parse_game(year, game_number)
         pprint(game)
-
-
-
-
 
 def tester():
     # p = Parser(); p.verify_load_data();
