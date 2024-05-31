@@ -104,12 +104,14 @@ class Game:
 
 
 
-
+    def to_dict(self) -> dict:
+        return {attr: getattr(self, attr) for attr in dir(self) if not attr.startswith("__") and not callable(getattr(self, attr))}
 
 
     def __repr__(self) -> str:
-        #return str([f'{attr}:{getattr(self, attr)}' for attr in dir(self) if not attr.startswith("__") and not callable(getattr(self, attr))])
-        return str({attr: getattr(self, attr) for attr in dir(self) if not attr.startswith("__") and not callable(getattr(self, attr))})
+        #return str([f'{attr}:{getattr(self, attr)}' for attr in dir(self) if not attr.startswith("__") and not callable(getattr(self, attr))])]
+        #return str({attr: getattr(self, attr) for attr in dir(self) if not attr.startswith("__") and not callable(getattr(self, attr))})
+        return str(self.to_dict())
 
 
     def to_features(self): # return useful features
@@ -135,7 +137,12 @@ class Parser:
         if not self.data or self.year != year:
             self.load_data(year)
 
-        game_data = self.data['games'][game_number]
+        try:
+            game_data = self.data['games'][game_number]
+        except Exception as e:
+            print("MISSING GAME", e, year, game_number)
+            return None
+
         game = Game()
 
         game.game_id = game_data['id']
@@ -152,8 +159,6 @@ class Parser:
         except Exception as e:
             print("Parse Game Exception", e, year, game_number)
             return None
-
-
 
         return game
 
