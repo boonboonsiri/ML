@@ -1,4 +1,5 @@
 import torch
+import matplotlib.pyplot as plt
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.model_selection import KFold
 import torch.nn as nn
@@ -7,67 +8,81 @@ import torch.optim as optim
 # Load data tensors
 features_tensor = torch.load('data/v0_features_tensor.pt')
 labels_tensor = torch.load('data/v0_labels_tensor.pt')
+print(features_tensor.size(), labels_tensor.size())
 
-# Define PyTorch dataset
+
+# Create a TensorDataset and DataLoader
 dataset = TensorDataset(features_tensor, labels_tensor)
+dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
-# Define your PyTorch model
-class MyModel(nn.Module):
-    def __init__(self):
-        super(MyModel, self).__init__()
-        # Define your model architecture
-        self.fc1 = nn.Linear(10, 64)
-        self.fc2 = nn.Linear(64, 32)
-        self.fc3 = nn.Linear(32, 16)
-        self.fc4 = nn.Linear(16, 1)
+
+# Define the model with more layers
+class DeepNN(nn.Module):
+    def __init__(self, input_size, hidden_size1, hidden_size2, hidden_size3, output_size):
+        super(DeepNN, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size1)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size1, hidden_size2)
+        self.relu2 = nn.ReLU()
+        self.fc3 = nn.Linear(hidden_size2, hidden_size3)
+        self.relu3 = nn.ReLU()
+        self.fc4 = nn.Linear(hidden_size3, output_size)
+        self.sigmoid = nn.Sigmoid()  # Sigmoid activation for binary classification
+
 
     def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        x = torch.relu(self.fc3(x))
-        x = self.fc4(x)
-        return x
+        out = self.fc1(x)
+        out = self.relu1(out)
+        out = self.fc2(out)
+        out = self.relu2(out)
+        out = self.fc3(out)
+        out = self.relu3(out)
+        out = self.fc4(out)
+        out = self.sigmoid(out)
+        return out
 
-# Instantiate model
-model = MyModel()
+# Instantiate the model
+input_size = 10
+hidden_size1 = 64
+hidden_size2 = 128
+hidden_size3 = 64
+output_size = 1  # Assuming binary classification
+model = DeepNN(input_size, hidden_size1, hidden_size2, hidden_size3, output_size)
 
-# Define loss function and optimizer
-criterion = nn.MSELoss()
-optimizer = optim.SGD(model.parameters(), lr=0.01)
+# Define the loss function and optimizer
+criterion = nn.BCELoss()  # For binary classification
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# Define number of folds for cross-validation
-num_folds = 5
-num_epochs = 20
-kf = KFold(n_splits=num_folds)
+# Training loop
+num_epochs = 500
 
-# Iterate over folds
-for fold, (train_indices, val_indices) in enumerate(kf.split(dataset)):
-    print(f"Fold {fold + 1}/{num_folds}")
+losses = []
 
-    # Create DataLoader for training and validation
-    train_sampler = torch.utils.data.SubsetRandomSampler(train_indices)
-    train_loader = DataLoader(dataset, batch_size=32, sampler=train_sampler)
-    val_sampler = torch.utils.data.SubsetRandomSampler(val_indices)
-    val_loader = DataLoader(dataset, batch_size=32, sampler=val_sampler)
+for epoch in range(num_epochs):
+    epoch_loss = 0.0
+    for batch_features, batch_labels in dataloader:
+        # Forward pass
+        outputs = model(batch_features)
 
+        loss = criterion(outputs.squeeze(), batch_labels.float())
 
-    # Train model
-    for epoch in range(num_epochs):
-        model.train()  # Set model to training mode
-        for inputs, labels in train_loader:
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
+        # Backward pass and optimization
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-    # Evaluate model
-    model.eval()  # Set model to evaluation mode
-    with torch.no_grad():
-        for inputs, labels in val_loader:
-            outputs = model(inputs)
-            val_loss = criterion(outputs, labels)
+    #epoch_loss /= len(dataloader)
+    #losses.append(epoch_loss)
+    losses.append(loss.item())
 
-    print(f"Validation Loss: {val_loss.item()}")
+    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
 
-# Compute average performance metrics across folds if needed
+# Plot loss versus epoch
+plt.plot(range(1, num_epochs+1), losses)
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.title('Loss vs Epoch')
+plt.show()
+
+# Print final model state (optional)
+print("Training completed.")

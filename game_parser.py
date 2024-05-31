@@ -15,7 +15,7 @@ def league_percentage_calculator(cur_game, year):
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, game_dict=None):
         # future ideas
         self.distance = None # distance matrix of all teams
         self.backtoback = None
@@ -102,7 +102,10 @@ class Game:
         self.away_p4 = None
         self.away_p5 = None
 
-    def __init__(self, game_dict): # please work lol
+        if game_dict:
+            self.init_dict(game_dict)
+
+    def init_dict(self, game_dict): # please work lol
         for key, value in game_dict.items():
             setattr(self, key, value)
 

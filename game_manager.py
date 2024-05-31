@@ -10,7 +10,8 @@ import torch
 class GameManager:
     def __init__(self):
         # settings
-        self.seasons = [2019, 2020, 2021, 2022, 2023]
+        self.seasons = [2018]
+        self.tensor_seasons = [2018, 2019, 2020, 2021, 2022, 2023]
         self.multiprocessing = True
 
 
@@ -47,11 +48,11 @@ class GameManager:
         results = []
         if self.multiprocessing:
             pool = multiprocessing.Pool(processes=5)  # Number of processes
-            results = pool.map(self.get_tensors_season, self.seasons)
+            results = pool.map(self.get_tensors_season, self.tensor_seasons)
             pool.close()
             pool.join()
         else:
-            for season in self.seasons:
+            for season in self.tensor_seasons:
                 results.append(self.get_tensors_season(season))
 
         features_results = [result[0] for result in results]
@@ -87,8 +88,8 @@ def testing():
     #print(season_data['games'][-1])
 
 def main():
-    testing()
-    # g = GameManager(); g.parse_all() # RE PARSE ALL DATA
+    #testing()
+    #g = GameManager(); g.parse_all() # RE PARSE ALL DATA
     g = GameManager(); g.get_tensors_all_seasons()
 if __name__ == "__main__":
     main()

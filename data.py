@@ -41,7 +41,8 @@ class FileManager:
 class APIMachine:
 
     def __init__(self):
-        self.seasons = [2019, 2020, 2021, 2022, 2023]
+        # self.seasons = [2019, 2020, 2021, 2022, 2023]
+        self.seasons = [2018]
         self.multiprocessing = True
 
     def api_download_all(self):
@@ -98,13 +99,14 @@ class APIMachine:
 
 
 def testing():
+    pass
     # f = FileManager(); f.verify()
-    a = APIMachine(); a.verify_game_api(2020, 10)
+    #a = APIMachine(); a.verify_game_api(2020, 10)
     #f = FileManager(); a = f.read('test.json')
 
 def main():
     testing()
-    #a = APIMachine(); a.api_download_all() # download
+    a = APIMachine(); a.api_download_all() # download
 
 if __name__ == "__main__":
     main()
