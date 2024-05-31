@@ -4,6 +4,7 @@ from pprint import pprint
 from tqdm import tqdm
 import multiprocessing
 import torch
+import matplotlib.pyplot as plt
 
 
 # Main interaction for creating, manipulating, reading, and writing games
@@ -68,7 +69,6 @@ class GameManager:
         torch.save(features_tensors, features_file)
         torch.save(labels_tensors, labels_file)
 
-
     def get_tensors_season(self, season: int):
         season_data = self.read_season(season)
         tensors_arr = [g.to_features_v0() for g in season_data['games'] if g] #!HERE
@@ -77,19 +77,47 @@ class GameManager:
         labels_torch = data_torch[:, -1]
         return features_torch, labels_torch
 
+    def get_tensor(self, season: int, game_number: int):
+        season_data = self.read_season(season)
+        game = season_data['games'][game_number-1] # - 1 for how I store vs NHL
+        tensors_arr =[game.to_features_v0()]
+        data_torch = torch.tensor(tensors_arr, dtype=torch.float32)
+        features_torch = data_torch[:, :-1]
+        labels_torch = data_torch[:, -1]
+
+        return game, features_torch, labels_torch
+
+    def check_spread(self, season=2023):
+        features, labels = self.get_tensors_season(season)
+
+        combined = [(feature, label) for feature, label in zip(features, labels)]
+        combined.sort(key=lambda x: x[1])
+
+        features = [x[0] for x in combined]
+        labels = [x[1] for x in combined]
+
+        # Plot loss versus epoch
+        # plt.plot(range(1, len(features)), [], label='Train Loss')
+        plt.plot(range(0, len(features)), labels, label='Outcome')
+        plt.xlabel('Game')
+        plt.ylabel('Various')
+        plt.title('Loss vs Epoch')
+        plt.legend()
+        plt.show()
 
 
 
 def testing():
-    pass
     g = GameManager()
-
     #season_data = g.read_season(2023)
+    #pprint(g.get_tensor(2023, 1244))
+    g.check_spread()
+    #import pdb; pdb.set_trace()
     #print(season_data['games'][-1])
 
 def main():
-    #testing()
+    testing()
     #g = GameManager(); g.parse_all() # RE PARSE ALL DATA
-    g = GameManager(); g.get_tensors_all_seasons()
+    #g = GameManager(); g.get_tensors_all_seasons()
 if __name__ == "__main__":
     main()
