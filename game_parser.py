@@ -102,7 +102,9 @@ class Game:
         self.away_p4 = None
         self.away_p5 = None
 
-
+    def __init__(self, game_dict): # please work lol
+        for key, value in game_dict.items():
+            setattr(self, key, value)
 
     def to_dict(self) -> dict:
         return {attr: getattr(self, attr) for attr in dir(self) if not attr.startswith("__") and not callable(getattr(self, attr))}
@@ -114,8 +116,26 @@ class Game:
         return str(self.to_dict())
 
 
-    def to_features(self): # return useful features
-        pass
+    def to_features_v0(self): # return useful features
+        home_points = (self.home_p1 + self.home_p2 + self.home_p3 + self.home_p4 + self.home_p5) / (1.5*10*5)
+        away_points = (self.away_p1 + self.away_p2 + self.away_p3 + self.away_p4 + self.away_p5) / (1.5*10*5)
+
+        return [
+            1-self.home_standing,
+            home_points,
+            self.home_save_percentage_l10,
+            self.home_wins/10,
+            self.home_goals_for_l10/(5*10),
+
+            1-self.away_standing,
+            away_points,
+            self.away_save_percentage_l10,
+            self.away_wins/10,
+            self.away_goals_for_l10/(5*10),
+
+            self.winner,
+        ]
+
 
 class Parser:
     def __init__(self):
