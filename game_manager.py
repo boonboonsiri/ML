@@ -5,6 +5,7 @@ from tqdm import tqdm
 import multiprocessing
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 # Main interaction for creating, manipulating, reading, and writing games
@@ -87,18 +88,44 @@ class GameManager:
 
         return game, features_torch, labels_torch
 
-    def check_spread(self, season=2023):
-        features, labels = self.get_tensors_season(season)
+    def check_spread(self, season=2023, to_analyse=[0,1]):
+        def get_averages(combined, to_analyse):
+            for num in to_analyse:
+                combined.sort(key=lambda x: float(x[0][num]))
+                total = [c[0][num] for c in combined]
+                mean = float(sum(total) / len(total))
+                median = float(total[len(total)//2])
 
+                home_wins = [elem[0][num] for elem in combined if elem[1] == 1]
+                away_wins = [elem[0][num] for elem in combined if elem[1] == 0]
+
+                mean_home = float(sum(home_wins) / len(home_wins))
+                median_home = float(home_wins[len(home_wins)//2])
+                mean_away = float(sum(away_wins) / len(away_wins))
+                median_away = float(away_wins[len(away_wins)//2])
+                #import pdb; pdb.set_trace()
+
+                print(num, mean, median, mean_home, median_home, mean_away, median_away)
+
+        features, labels = self.get_tensors_season(season)
         combined = [(feature, label) for feature, label in zip(features, labels)]
-        combined.sort(key=lambda x: x[1])
+        get_averages(combined, to_analyse)
+
+
+        combined.sort(key=lambda x: float(x[0][0]))
+        combined.sort(key=lambda x: x[1]) # sort by wins loses
 
         features = [x[0] for x in combined]
         labels = [x[1] for x in combined]
 
-        # Plot loss versus epoch
-        # plt.plot(range(1, len(features)), [], label='Train Loss')
         plt.plot(range(0, len(features)), labels, label='Outcome')
+
+        # Plot each array as a separate line
+        for i, _ in enumerate(features[0]):
+            arr = [f[i] for f in features]
+            if i in to_analyse:
+                plt.plot(arr, label=f'Line {i}')
+
         plt.xlabel('Game')
         plt.ylabel('Various')
         plt.title('Loss vs Epoch')

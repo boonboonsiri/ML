@@ -122,8 +122,8 @@ class Game:
         home_points = (self.home_p1 + self.home_p2 + self.home_p3 + self.home_p4 + self.home_p5) / (1.5*10*5)
         away_points = (self.away_p1 + self.away_p2 + self.away_p3 + self.away_p4 + self.away_p5) / (1.5*10*5)
         return [
-            1-self.home_standing,
-            home_points,
+            1-self.home_standing - (1-self.away_standing),
+            home_points-away_points,
             self.home_save_percentage_l10,
             self.home_wins_l10/10,
             self.home_goals_for_l10/(5*10),
