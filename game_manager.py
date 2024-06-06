@@ -6,6 +6,7 @@ import multiprocessing
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 
 # Main interaction for creating, manipulating, reading, and writing games
@@ -88,7 +89,56 @@ class GameManager:
 
         return game, features_torch, labels_torch
 
-    def check_spread(self, season=2023, to_analyse=[0,1]):
+    def check_spread(self, season=2023, to_analyse=[0,1,2]):
+
+        def scatter(combined, slice_length=10):
+            def generate_reddish_hex():
+                # Generate random values for red, green, and blue components
+                red = random.randint(170, 255)  # R: 170-255 for reddish tones
+                green = random.randint(0, 100)   # G: 0-100 for darker shades
+                blue = random.randint(0, 100)    # B: 0-100 for darker shades
+
+                # Convert RGB values to hexadecimal format
+                hex_code = "#{:02x}{:02x}{:02x}".format(red, green, blue)
+
+                return hex_code
+
+            def generate_bluish_hex():
+                # Generate random values for red, green, and blue components
+                red = random.randint(0, 100)    # R: 0-100 for darker shades
+                green = random.randint(0, 100)  # G: 0-100 for darker shades
+                blue = random.randint(170, 255) # B: 170-255 for bluish tones
+
+                # Convert RGB values to hexadecimal format
+                hex_code = "#{:02x}{:02x}{:02x}".format(red, green, blue)
+
+                return hex_code
+
+            random_indices = sorted(np.random.choice(len(combined), slice_length, replace=False))
+
+            arr = []
+            for i in random_indices:
+                arr.append(combined[i])
+
+
+            y = np.array([i for i in range(len(arr[0][0])+1)])
+
+            for elem in arr:
+                x = elem[0].tolist() + [elem[1].tolist()]
+                x = np.array(x)
+                jitter_strength = 0.1
+                y_jitter =  np.random.normal(0, jitter_strength, y.shape)
+                y_jitter = np.where(x[-1] == 1, -np.abs(y_jitter), np.abs(y_jitter))
+                y_jittered = y + y_jitter
+
+                hex = generate_bluish_hex() if x[-1] == 1 else generate_reddish_hex()
+                plt.scatter(y_jittered, x,s=3, c=hex)
+
+            plt.ylabel('X-axis Label')
+            plt.xlabel('Y-axis Label')
+            plt.title('Scatter Plot Example')
+            plt.show()
+
         def get_averages(combined, to_analyse):
             for num in to_analyse:
                 combined.sort(key=lambda x: float(x[0][num]))
@@ -110,9 +160,10 @@ class GameManager:
         features, labels = self.get_tensors_season(season)
         combined = [(feature, label) for feature, label in zip(features, labels)]
         get_averages(combined, to_analyse)
+        scatter(combined)
 
 
-        combined.sort(key=lambda x: float(x[0][0]))
+        combined.sort(key=lambda x: float(x[0][2]))
         combined.sort(key=lambda x: x[1]) # sort by wins loses
 
         features = [x[0] for x in combined]

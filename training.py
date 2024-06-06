@@ -15,7 +15,7 @@ print(features_tensor.size(), labels_tensor.size())
 
 
 # Split the data into training and test sets
-train_features, test_features, train_labels, test_labels = train_test_split(features_tensor, labels_tensor, test_size=0.1, random_state=42)
+train_features, test_features, train_labels, test_labels = train_test_split(features_tensor, labels_tensor, test_size=0.4, random_state=42)
 fe = [train_features, test_features, train_labels, test_labels ]
 for f in fe:
     print(f.size())

@@ -119,20 +119,24 @@ class Game:
 
 
     def to_features_v0(self): # return useful features
-        home_points = (self.home_p1 + self.home_p2 + self.home_p3 + self.home_p4 + self.home_p5) / (1.5*10*5)
-        away_points = (self.away_p1 + self.away_p2 + self.away_p3 + self.away_p4 + self.away_p5) / (1.5*10*5)
+        home_points = (self.home_p1 + self.home_p2 + self.home_p3) / (1.5*10*3)
+        away_points = (self.away_p1 + self.away_p2 + self.away_p3) / (1.5*10*3)
+
+        streak = (self.home_streak if self.home_streak_code == 'W' else -self.home_streak) +(-self.away_streak if self.away_streak_code == 'W' else self.away_streak)
         return [
             1-self.home_standing - (1-self.away_standing),
             home_points-away_points,
-            self.home_save_percentage_l10,
-            self.home_wins_l10/10,
-            self.home_goals_for_l10/(5*10),
+            streak/20,
+
+            #self.home_save_percentage_l10,
+            (self.home_wins_l10-self.away_wins_l10)/10,
+            self.home_goals_for_l10/(3*10),
 
             1-self.away_standing,
             away_points,
-            self.away_save_percentage_l10,
+            (self.away_save_percentage_l10-0.85)/0.15,
             self.away_wins_l10/10,
-            self.away_goals_for_l10/(5*10),
+            self.away_goals_for_l10/(3*10),
 
             self.winner,
         ]
